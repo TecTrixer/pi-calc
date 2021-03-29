@@ -1,6 +1,6 @@
+use clap::{App, Arg};
 use rug::Float;
 use std::io::{stdout, Write};
-use clap::{Arg, App};
 
 fn main() {
     let matches = App::new("Pi Calculator")
@@ -14,13 +14,19 @@ fn main() {
                                .short("s")
                                .long("short")
                                .help("Only prints the value of pi without a progress indicator and the number of iterations"))
+                          .arg(Arg::with_name("long")
+                                .short("l")
+                                .long("long")
+                                .help("Prints additional information such as the number of iterations and the floating point precision")
+                                .conflicts_with("short"))
                           .get_matches();
     let mut stdout = stdout();
     let num_of_digits: u32 = match matches.value_of("DIGITS").unwrap_or("10").parse::<u32>() {
         Ok(num) => num + 1,
-        _ => 11
+        _ => 11,
     };
     let short: bool = matches.is_present("short");
+    let long: bool = matches.is_present("long");
     let prec: u32;
     let steps: u32;
     if num_of_digits > 200 {
@@ -44,11 +50,8 @@ fn main() {
                 break;
             }
         }
-        println!(
-            "{}",
-            pi_from_area(area.clone(), num_of_digits),
-        );
-    } else {
+        println!("{}", pi_from_area(area.clone(), num_of_digits),);
+    } else if long {
         loop {
             b = b_from_a(&a, prec);
             area += area_of_triangle(&a, &b) * num_of_triangles(step, prec);
@@ -57,9 +60,14 @@ fn main() {
             if step > steps {
                 break;
             }
-            print!("Completed {:3.2}%\r", step as f64/ (1.7 * num_of_digits as f64) * 100.0);
+            print!(
+                "Completed {:3.2}%, Steps: {}/{}\r",
+                step as f64 / (1.7 * num_of_digits as f64) * 100.0, step, steps
+            );
             stdout.flush().unwrap();
         }
+        print!("                 \r");
+        stdout.flush().unwrap();
         println!(
             "Pi: {}, Iterations: {:3}, Floating Point Precision: {}",
             pi_from_area(area.clone(), num_of_digits),
@@ -67,7 +75,28 @@ fn main() {
             prec
         );
     }
-
+    else {
+        loop {
+            b = b_from_a(&a, prec);
+            area += area_of_triangle(&a, &b) * num_of_triangles(step, prec);
+            a = new_a(a, b, prec);
+            step += 1;
+            if step > steps {
+                break;
+            }
+            print!(
+                "Completed {:3.2}%\r",
+                step as f64 / (1.7 * num_of_digits as f64) * 100.0
+            );
+            stdout.flush().unwrap();
+        }
+        print!("                 \r");
+        stdout.flush().unwrap();
+        println!(
+            "{}",
+            pi_from_area(area.clone(), num_of_digits),
+        );
+    }
 }
 
 fn area_of_triangle(a: &Float, b: &Float) -> Float {
@@ -90,7 +119,7 @@ fn new_a(previous_a: Float, previous_b: Float, prec: u32) -> Float {
 
 fn pi_from_area(area: Float, digits: u32) -> String {
     let pi = (area * 4) as Float;
-    let mut pi_string: String = format!("{:.width$}", pi, width=(digits + 1) as usize);
+    let mut pi_string: String = format!("{:.width$}", pi, width = (digits + 1) as usize);
     pi_string.pop();
     pi_string
 }
