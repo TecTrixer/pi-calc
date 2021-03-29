@@ -4,11 +4,11 @@ use clap::{Arg, App};
 
 fn main() {
     let matches = App::new("Pi Calculator")
-                          .version("0.1")
+                          .version("0.1.0")
                           .author("TecTrixer <tonihoevedes@gmail.com>")
                           .about("Calculates the value of pi using an algorithm similar to Archimedes approach")
                           .arg(Arg::with_name("DIGITS")
-                               .help("Sets the number of digits of pi to be calculated")
+                               .help("Sets the number of digits of pi which are going to be calculated - the default value is 10")
                                .index(1))
                           .arg(Arg::with_name("short")
                                .short("s")
