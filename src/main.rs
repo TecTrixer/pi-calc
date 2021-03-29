@@ -1,39 +1,26 @@
 use rug::Float;
-use std::env;
 use std::io::{stdout, Write};
+use clap::{Arg, App};
 
 fn main() {
+    let matches = App::new("Pi Calculator")
+                          .version("0.1")
+                          .author("TecTrixer <tonihoevedes@gmail.com>")
+                          .about("Calculates the value of pi using an algorithm similar to Archimedes approach")
+                          .arg(Arg::with_name("DIGITS")
+                               .help("Sets the number of digits of pi to be calculated")
+                               .index(1))
+                          .arg(Arg::with_name("short")
+                               .short("s")
+                               .long("short")
+                               .help("Only prints the value of pi without a progress indicator and the number of iterations"))
+                          .get_matches();
     let mut stdout = stdout();
-    let args: Vec<String> = env::args().collect();
-    let num_of_digits: u32;
-    let short: bool;
-    let len = args.iter().count();
-    if len < 2 {
-        short = false;
-        num_of_digits = 11;
-    }
-    else if len < 3 {
-        short = false;
-        num_of_digits = match args[1].parse::<u32>() {
-            Ok(num) => num + 1,
-            _ => 11,
-        };
-    }
-    else {
-        short = match &args[2] {
-            arg => {
-                if arg.to_owned() == "-s".to_string() || arg.to_owned() == "--short".to_string() {
-                    true
-                } else {
-                    false
-                }
-            }
-        };
-        num_of_digits = match args[1].parse::<u32>() {
-            Ok(num) => num + 1,
-            _ => 11,
-        };
-    }
+    let num_of_digits: u32 = match matches.value_of("DIGITS").unwrap_or("10").parse::<u32>() {
+        Ok(num) => num + 1,
+        _ => 11
+    };
+    let short: bool = matches.is_present("short");
     let prec: u32;
     let steps: u32;
     if num_of_digits > 200 {
@@ -74,9 +61,10 @@ fn main() {
             stdout.flush().unwrap();
         }
         println!(
-            "Pi: {}, Step: {:3}",
+            "Pi: {}, Iterations: {:3}, Floating Point Precision: {}",
             pi_from_area(area.clone(), num_of_digits),
             step - 1,
+            prec
         );
     }
 
