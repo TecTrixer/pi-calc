@@ -61,7 +61,7 @@ fn main() {
                 break;
             }
             print!(
-                "Completed {:3.2}%, Steps: {}/{}\r",
+                "Completed {:3.2}%, Iterations: {}/{}\r",
                 step as f64 / (1.7 * num_of_digits as f64) * 100.0, step, steps
             );
             stdout.flush().unwrap();
